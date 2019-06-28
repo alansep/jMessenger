@@ -1,6 +1,5 @@
 package edu.fema.jmessenger.jMessenger;
 
-import edu.fema.jmessenger.jMessenger.visual.janelaChat;
 import java.util.Scanner;
 
 import javax.jms.JMSException;
@@ -16,17 +15,23 @@ import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 import javax.naming.InitialContext;
 
+import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.ActiveMQConnectionFactory;
+
+import edu.fema.jmessenger.jMessenger.locate.Starter;
+
 public class Chat implements MessageListener {
 	private TopicSession pubSession;
 	private TopicPublisher publisher;
 	private TopicConnection connection;
 	private String username;
 
-	public Chat(String fabricaDeTopic, String nomeDoTopico, String nomeDeUsuario) throws Exception {
+	public Chat(String fabricaDeTopic, String nomeDoTopico, String nomeDeUsuario, String ip) throws Exception {
 		InitialContext contexto = new InitialContext();
-		TopicConnectionFactory fabricaDeConexaoDeTopic = (TopicConnectionFactory) contexto.lookup(fabricaDeTopic);
-		TopicConnection conexao = fabricaDeConexaoDeTopic.createTopicConnection();
 
+		TopicConnectionFactory fabricaDeConexaoDeTopic = new ActiveMQConnectionFactory("admin", "admin",
+				"tcp://" + ip + ":61616");
+		TopicConnection conexao = fabricaDeConexaoDeTopic.createTopicConnection();
 		TopicSession sessaoPublisher = conexao.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 		TopicSession sessaoSubscriber = conexao.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 
@@ -56,7 +61,7 @@ public class Chat implements MessageListener {
 
 	public void escreverMensagem(String texto) throws JMSException {
 		TextMessage message = pubSession.createTextMessage();
-		message.setText(username + "diz: " + texto);
+		message.setText(username + " diz: " + texto);
 		publisher.publish(message);
 	}
 
@@ -65,15 +70,16 @@ public class Chat implements MessageListener {
 	}
 
 	public static void main(String[] args) {
-                janelaChat j = new janelaChat();
-                j.setVisible(true);
 		Scanner scannerLinhaDeComando = new Scanner(System.in);
 		try {
 
+			Starter st = new Starter();
+
 			System.out.print("Digite seu nome: ");
 			String nome = scannerLinhaDeComando.nextLine();
-
-			Chat chat = new Chat("TopicCF", "topicChat", nome);
+			System.out.println("Digite o ip do middleware:");
+			String ip = scannerLinhaDeComando.nextLine();
+			Chat chat = new Chat("TopicCF", "topicChat", nome, ip);
 			System.out.println("\n\n\tBem vindo " + nome + "!");
 
 			while (true) {
