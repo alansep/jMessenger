@@ -1,5 +1,6 @@
 package edu.fema.jmessenger.jMessenger;
 
+import edu.fema.jmessenger.jMessenger.visual.janelaChat;
 import java.util.Scanner;
 
 import javax.jms.JMSException;
@@ -64,6 +65,8 @@ public class Chat implements MessageListener {
 	}
 
 	public static void main(String[] args) {
+                janelaChat j = new janelaChat();
+                j.setVisible(true);
 		Scanner scannerLinhaDeComando = new Scanner(System.in);
 		try {
 
