@@ -38,7 +38,7 @@ public class App {
 		} else {
 			new Timer().schedule(new tarefa2(), 0, 2000);
 		}
-
+		sc.close();
 	}
 
 	public static class tarefa2 extends TimerTask {
