@@ -19,83 +19,62 @@ import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import edu.fema.jmessenger.jMessenger.locate.Starter;
+import edu.fema.jmessenger.jMessenger.visual.ChatActive;
+import javax.swing.JOptionPane;
 
 public class Chat implements MessageListener {
-	private TopicSession pubSession;
-	private TopicPublisher publisher;
-	private TopicConnection connection;
-	private String username;
 
-	public Chat(String fabricaDeTopic, String nomeDoTopico, String nomeDeUsuario, String ip) throws Exception {
-		InitialContext contexto = new InitialContext();
+    private TopicSession pubSession;
+    private TopicPublisher publisher;
+    private TopicConnection connection;
+    private String username;
+    private ChatActive chat;
 
-		TopicConnectionFactory fabricaDeConexaoDeTopic = new ActiveMQConnectionFactory("admin", "admin",
-				"tcp://" + ip + ":61616");
-		TopicConnection conexao = fabricaDeConexaoDeTopic.createTopicConnection();
-		TopicSession sessaoPublisher = conexao.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-		TopicSession sessaoSubscriber = conexao.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+    public Chat(String fabricaDeTopic, String nomeDoTopico, String nomeDeUsuario, String ip, ChatActive chat) throws Exception {
+        
+        InitialContext contexto = new InitialContext();
+        this.chat = chat;
+      
 
-		Topic topicDoChat = (Topic) contexto.lookup(nomeDoTopico);
+        TopicConnectionFactory fabricaDeConexaoDeTopic = new ActiveMQConnectionFactory("admin", "admin",
+                "tcp://" + ip + ":61616");
+        TopicConnection conexao = fabricaDeConexaoDeTopic.createTopicConnection();
+        TopicSession sessaoPublisher = conexao.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+        TopicSession sessaoSubscriber = conexao.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+     
+        Topic topicDoChat = (Topic) contexto.lookup(nomeDoTopico);
 
-		TopicPublisher publisher = sessaoPublisher.createPublisher(topicDoChat);
-		TopicSubscriber subscriber = sessaoSubscriber.createSubscriber(topicDoChat);
+        TopicPublisher publisher = sessaoPublisher.createPublisher(topicDoChat);
+        TopicSubscriber subscriber = sessaoSubscriber.createSubscriber(topicDoChat);
+      
 
-		subscriber.setMessageListener(this);
+        subscriber.setMessageListener(this);
 
-		this.connection = conexao;
-		this.pubSession = sessaoPublisher;
-		this.publisher = publisher;
-		this.username = nomeDeUsuario;
+        this.connection = conexao;
+        this.pubSession = sessaoPublisher;
+        this.publisher = publisher;
+        this.username = nomeDeUsuario;
+        conexao.start();
+    }
 
-		conexao.start();
-	}
+    public void onMessage(Message mensagem) {
+        try {
+            TextMessage textMessage = (TextMessage) mensagem;
+            this.chat.atualizarTexto(textMessage.getText());
+        } catch (JMSException jmse) {
+            jmse.printStackTrace();
+        }
+    }
 
-	public void onMessage(Message mensagem) {
-		try {
-			TextMessage textMessage = (TextMessage) mensagem;
-			System.out.println(textMessage.getText());
-		} catch (JMSException jmse) {
-			jmse.printStackTrace();
-		}
-	}
+    public void escreverMensagem(String usuario, String texto) throws JMSException {
+       
+       TextMessage message = pubSession.createTextMessage();
+       message.setText(usuario + " diz: " + texto);
+        System.out.println(message.getText());
+       publisher.publish(message);
+    }
 
-	public void escreverMensagem(String texto) throws JMSException {
-		TextMessage message = pubSession.createTextMessage();
-		message.setText(username + " diz: " + texto);
-		publisher.publish(message);
-	}
-
-	public void close() throws JMSException {
-		connection.close();
-	}
-
-	public static void main(String[] args) {
-		Scanner scannerLinhaDeComando = new Scanner(System.in);
-		try {
-
-			Starter st = new Starter();
-
-			System.out.print("Digite seu nome: ");
-			String nome = scannerLinhaDeComando.nextLine();
-			System.out.println("Digite o ip do middleware:");
-			String ip = scannerLinhaDeComando.nextLine();
-			Chat chat = new Chat("TopicCF", "topicChat", nome, ip);
-			System.out.println("\n\n\tBem vindo " + nome + "!");
-
-			while (true) {
-				String palavra = scannerLinhaDeComando.nextLine();
-				if (palavra.equalsIgnoreCase("exit")) {
-					chat.close();
-					System.exit(0);
-				} else {
-					chat.escreverMensagem(palavra);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		} finally {
-			scannerLinhaDeComando.close();
-		}
-	}
+    public void close() throws JMSException {
+        connection.close();
+    }
 }
