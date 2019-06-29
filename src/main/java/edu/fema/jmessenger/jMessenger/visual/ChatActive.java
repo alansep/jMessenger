@@ -57,15 +57,12 @@ public class ChatActive extends javax.swing.JFrame {
 
     public ChatActive(String ip, String nomeUsuario) {
         initComponents();
-        this.titulo = titulo;
         this.nomeUsuario = nomeUsuario;
         this.labelNome.setText(nomeUsuario);
-        initComponents();
-        //  caixaMensagem = new JTextField("");
         try {
             chat = new Chat("TopicCF", "topicChat", this.nomeUsuario, ip, this);
         } catch (Exception ex) {
-            Logger.getLogger(ChatActive.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Erro ao criar conexão!");
         }
 
     }

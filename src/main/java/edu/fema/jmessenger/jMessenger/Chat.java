@@ -1,6 +1,6 @@
 package edu.fema.jmessenger.jMessenger;
 
-import java.util.Scanner;
+
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -18,9 +18,7 @@ import javax.naming.InitialContext;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import edu.fema.jmessenger.jMessenger.locate.Starter;
 import edu.fema.jmessenger.jMessenger.visual.ChatActive;
-import javax.swing.JOptionPane;
 
 public class Chat implements MessageListener {
 

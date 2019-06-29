@@ -285,7 +285,9 @@ public class jMessengerHome extends javax.swing.JFrame {
     }//GEN-LAST:event_txtIpActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        new ObjetoChatActive(txtIp.getText(), txtNome.getText()).run();
+       
+        new ObjetoChatActive(txtIp.getText(), txtNome.getText()).start();
+        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     public void settarLayout(String layout) {
